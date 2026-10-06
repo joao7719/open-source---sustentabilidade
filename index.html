@@ -407,6 +407,7 @@
       </footer>
     </div>
 
+    <script src="calculadora.js"></script>
     <script>
       (function () {
         "use strict";
@@ -470,14 +471,24 @@
           var occ = Math.max(1, Number(occupants.value) || 1);
           var kwhVal = Math.max(0, Number(kwh.value) || 0);
 
-          var mobilityKg = (carKmVal * 52 * FACTOR_CAR_KM) + (publicKmVal * 52 * FACTOR_PUBLIC_KM) + (FLIGHT_KG[flights.value] || 0);
-          var energyKg = (kwhVal / occ) * 12 * FACTOR_KWH;
           var dietKg = DIET_KG_YEAR[getDiet()];
           var wasteKg = WASTE_KG_YEAR[getRecycle()];
-
-          var totalKg = mobilityKg + energyKg + dietKg + wasteKg;
-          var totalTonsVal = totalKg / 1000;
-
+          var emissao = calcularEmissoes({
+            carKm: carKmVal,
+            publicKm: publicKmVal,
+            flightsKg: FLIGHT_KG[flights.value] || 0,
+            kwh: kwhVal,
+            occupants: occ,
+            dietKg: dietKg,
+            wasteKg: wasteKg,
+            carFactor: FACTOR_CAR_KM,
+            publicFactor: FACTOR_PUBLIC_KM,
+            energyFactor: FACTOR_KWH
+          });
+          var mobilityKg = emissao.mobilityKg;
+          var energyKg = emissao.energyKg;
+          var totalKg = emissao.totalKg;
+          var totalTonsVal = emissao.totalTons;
           // medidor circular
           var gaugePct = Math.min(100, (totalTonsVal / GAUGE_MAX_TONS) * 100);
           orbit.style.setProperty("--progress", gaugePct.toFixed(1) + "%");
